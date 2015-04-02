@@ -1,5 +1,5 @@
 import rock/middle/[ControlStatement, Conditional, If, Else, While,
-    Foreach, RangeLiteral, VariableDecl, VariableAccess, Match]
+    Foreach, RangeLiteral, VariableDecl, VariableAccess, Match, Ccode]
 import Skeleton
 
 ControlStatementWriter: abstract class extends Skeleton {
@@ -15,6 +15,12 @@ ControlStatementWriter: abstract class extends Skeleton {
             writeLine(stat)
         }
         current untab(). nl(). app("}")
+    }
+
+    write: static func ~_ccode (this: Skeleton, c: Ccode) {
+      for(stat in c body) {
+          writeLine(stat)
+      }
     }
 
     write: static func ~_if (this: Skeleton, if1: If) {
@@ -67,18 +73,18 @@ ControlStatementWriter: abstract class extends Skeleton {
             for (stat in caze getBody()) writeLine(stat)
             current untab(). nl(). app("}")
         }
-        
+
         // `case =>` as only match-case
         if (cazes getSize() == 1) {
             caze := cazes get(0)
-            if (!caze getExpr()) {                 
+            if (!caze getExpr()) {
                 writeBody(caze)
                 return
             }
         }
-         
+
         // sort is the wrong term, it basically puts the `case =>` at the end
-        cazes sort(|x, y| 
+        cazes sort(|x, y|
             if (!x expr && y expr) return true
                 return false
         )
@@ -102,4 +108,3 @@ ControlStatementWriter: abstract class extends Skeleton {
     }
 
 }
-

@@ -52,7 +52,7 @@ VersionSpec: abstract class {
     isSatisfied: abstract func (params: BuildParams) -> Bool
 
     resolve: abstract func (trail: Trail, res: Resolver) -> Response
-    
+
     isResolved: func -> Bool { resolved }
 
 }
@@ -266,7 +266,7 @@ VersionAnd: class extends VersionSpec {
     equals?: func (other: VersionSpec) -> Bool {
         match other {
             case a: This =>
-                specLeft equals?(a specLeft) && 
+                specLeft equals?(a specLeft) &&
                 specRight equals?(a specRight)
             case => false
         }
@@ -330,4 +330,3 @@ VersionOr: class extends VersionSpec {
     }
 
 }
-

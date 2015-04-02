@@ -38,6 +38,7 @@ TypeDecl: abstract class extends Declaration {
   hasCheckedInheritance := false
   hasCheckedAbstract := false
   hasCheckedOverride := false
+  hasCheckedVirtualInheritance := false
 
   // the crux of the matter
   variables := HashMap<String, VariableDecl> new()
@@ -503,6 +504,9 @@ TypeDecl: abstract class extends Declaration {
                     if(!hasCheckedOverride && superType getRef() != null && isMeta) {
                       if(checkOverrideFuncs(res)) hasCheckedOverride = true
                     }
+                    if(!hasCheckedVirtualInheritance && superType getRef() != null && isMeta) {
+                      if(checkIneritedVirtualFunction(res)) hasCheckedVirtualInheritance = true
+                    }
                     //if(checkOverrideFuncs(res)) hasCheckedOverride = true
 
                     // So we resolved the super type, we got to make sure we have no field redifinitions
@@ -631,7 +635,7 @@ TypeDecl: abstract class extends Declaration {
 
                     }
                     /* Virtual Override */
-                    checkOverrideFuncs: func(res: Resolver) -> Bool{
+                    checkOverrideFuncs: func(res: Resolver) -> Bool {
                       list := ArrayList<TypeDecl> new()
                       current := this
 
@@ -684,6 +688,124 @@ TypeDecl: abstract class extends Declaration {
                       }
                     }
                     true
+                  }
+
+                  checkIneritedVirtualFunction: func (res: Resolver) -> Bool {
+                    list := ArrayList<TypeDecl> new()
+                    current := this
+
+                    while(current != null) {
+                      if(current getSuperType() == null) break
+
+                      next := current getSuperRef()
+                      if(next == null) {
+                        res wholeAgain(this, "need superRef to check function signatures")
+                        return false
+                      }
+
+                      list add(current)
+                      current = next
+                    }
+                    reversedList:= list.reverse()
+                    //reversedList:= list
+                    virtualList := ArrayList<String> new()
+                    if(reversedList size > 2) {
+                      for (i in 0..reversedList size - 1) {
+                        for (fdecl in reversedList[i] functions) {
+                          if(fdecl getName() == "test") {println("nqqnn " + fdecl getFullName() + fdecl isOverride() toString())}
+                          if(fdecl isVirtual) {
+                            virtualList add(fdecl getName())
+                            println("added: " + fdecl getName())
+                            println("size    " + virtualList size toString())
+                            if(virtualList contains?(fdecl getName())) {println("co")}
+                          } else  if(fdecl isOverride()) { println("size    " + virtualList size toString())
+                          //else if((fdecl isOverride()) && virtualList contains?(fdecl getName()) ) { println("ss   "  + fdecl getName()  + virtualList contains?(fdecl getName()) toString() )
+                          //else if((fdecl isOverride()) ) { println("ss   "  + fdecl getName()  + virtualList contains?(fdecl getName()) toString() )
+                          //else if(virtualList contains?(fdecl getName()) ) {//&& !(fdecl isOverride())) {
+                            println("contains")
+                            res throwError(Warning new(fdecl token, "Maybe this should be marked override?"))
+                          }
+                          /*for (j in i+1..reversedList size) {
+                            for (other in list[j] functions) {
+                              if(virtualList contains?(other getName()))  {println("contans")}
+                              if(virtualList contains?(other getName()) && (!other isOverride())) {
+                                println("contains")
+                                res throwError(Warning new(other token, "Maybe this should be marked override?"))
+                              }
+                            }
+                          }*/
+                        }
+                      }
+                    }
+                    true
+                  }
+/*                  checkIneritedVirtualFunction: func (res: Resolver) -> Bool {
+                    list := ArrayList<TypeDecl> new()
+                    current := this
+
+                    while(current != null) {
+                      if(current getSuperType() == null) break
+
+                      next := current getSuperRef()
+                      if(next == null) {
+                        res wholeAgain(this, "need superRef to check function signatures")
+                        return false
+                      }
+
+                      list add(current)
+                      current = next
+                    }
+                    //reversedList:= list.reverse()
+                    reversedList:= list
+                    virtualList := ArrayList<String> new()
+                    if(reversedList size > 2) {
+                      for (i in 0..reversedList size - 1) {
+                        for (fdecl in reversedList[i] functions) {
+                          if(fdecl getName() == "test") {println("nqqnn " + fdecl getFullName() + fdecl isOverride() toString())}
+                          if(fdecl isVirtual) {
+                            virtualList add(fdecl getName())
+                            println("added: " + fdecl getName())
+                          }
+                          for (j in i+1..reversedList size) {
+                            for (other in list[j] functions) {
+                              if(virtualList contains?(other getName()))  {println("contans")}
+                              if(virtualList contains?(other getName()) && (!other isOverride())) {
+                                println("contains")
+                                res throwError(Warning new(other token, "Maybe this should be marked override?"))
+
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    true
+                  }
+  */
+                  checkIneritedVirtualFunctionAbstractStyle: func (res: Resolver) -> Bool {
+                    current := this
+                    implemented := HashMap<String, FunctionDecl> new()
+                    contract    := ArrayList<FunctionDecl> new()
+                    while(current != null) {
+                      for(fDecl in current getFunctions()) {
+                        if(fDecl isVirtual) {
+                          contract add(fDecl)
+                          } else {
+                            hash := "%s_%s" format(fDecl getName(), fDecl getSuffix() ? fDecl getSuffix() : "")
+                            implemented put(hash, fDecl)
+                          }
+                        }
+
+                        if(current getSuperType() != null && current getSuperRef() == null) {
+                          res wholeAgain(this, "Needs superRef to check abstract funcs")
+                          return false
+                        }
+                        current = current getSuperRef()
+                      }
+                      for(fDecl in contract) {
+
+                      }
+                      return true
                   }
                     checkAbstractFuncs: func (res: Resolver) -> Bool {
 

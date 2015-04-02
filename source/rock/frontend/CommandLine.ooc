@@ -496,7 +496,6 @@ CommandLine: class {
             error(e message)
             failure(params)
         }
-
         if(modulePaths empty?() && !targetModule) {
             if (alreadyDidSomething) {
                 exit(0)
@@ -518,7 +517,6 @@ CommandLine: class {
 
             prepareCompilationFromUse(uzeFile, modulePaths, false, targetModule&)
         }
-
         if(params sourcePath empty?()) {
             moduleName := "program"
             if (!modulePaths empty?()) {
@@ -533,9 +531,7 @@ CommandLine: class {
             virtualUse sourcePath = File new(".") getAbsolutePath()
             virtualUse apply(params)
         }
-
         errorCode := 0
-
         if (targetModule) {
             postParsing(targetModule)
         } else for(modulePath in modulePaths) {
@@ -656,7 +652,6 @@ CommandLine: class {
         if (params timing) {
             "Parsing took %d ms" printfln(parseMs)
         }
-
         if(params verbose) {
             "Resolving..." println()
         }

@@ -463,7 +463,6 @@ VariableAccess: class extends Expression {
                 }
 
                 if(res params veryVerbose) {
-                    println("trail = " + trail toString())
                 }
                 msg := "Undefined symbol '%s'" format(subject toString())
                 if(res params helpful) {
@@ -594,4 +593,3 @@ NeedsDeref: class extends Error {
         super(access token, message)
     }
 }
-

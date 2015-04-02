@@ -52,7 +52,6 @@ ModuleWriter: abstract class extends Skeleton {
         for(funcType in module funcTypesMap) {
             writeFuncType(this, funcType, null)
         }
-
         /* write the .h file */
         current = hw
         current nl(). app("#pragma once")
@@ -82,7 +81,6 @@ ModuleWriter: abstract class extends Skeleton {
             current nl(). app("#include <"). app(inc). app(">")
         }
         current nl()
-
         // write the .c part of all global variables
         for(stmt in module body) {
             if(stmt instanceOf?(VariableDecl) && !stmt as VariableDecl getType() instanceOf?(AnonymousStructType)) {
@@ -147,7 +145,6 @@ ModuleWriter: abstract class extends Skeleton {
                 }
             }
         }
-
         for(stmt in module body) {
             if(stmt instanceOf?(VariableDecl) && !stmt as VariableDecl getType() instanceOf?(AnonymousStructType)) {
                 vd := stmt as VariableDecl

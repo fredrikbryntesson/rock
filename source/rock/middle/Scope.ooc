@@ -194,4 +194,3 @@ Scope: class extends Node {
     }
 
 }
-

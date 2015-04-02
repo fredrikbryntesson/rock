@@ -21,7 +21,7 @@ import rock/middle/[Module, FunctionDecl, FunctionCall, Expression, Type,
     Cast, Comparison, Ternary, BoolLiteral, Argument, Statement,
     AddressOf, Dereference, CommaSequence, UnaryOp, ArrayAccess, Match,
     FlowControl, InterfaceDecl, Version, Block, EnumDecl, ArrayLiteral,
-    ArrayCreation, StructLiteral, FuncType]
+    ArrayCreation, StructLiteral, FuncType, Ccode]
 
 // backend
 import Skeleton, FunctionDeclWriter, ControlStatementWriter,
@@ -344,6 +344,19 @@ CGenerator: class extends Skeleton {
                     untab(). nl(). app("}"). untab(). nl(). app("}")
         }
     }
+    visitCcode: func (c: Ccode) {
+        //ControlStatementWriter write(this, c)
+        //current app("/*" )
+        for(stat in c body) {
+            current app(stat toString())
+            println(stat toString())
+            current app(";")
+            current nl()
+        }
+
+        //current app("*")
+        //current app("/")
+    }
 
     /** Control statements */
     visitIf: func (if1: If) {
@@ -366,6 +379,7 @@ CGenerator: class extends Skeleton {
     }
     visitBlock: func (b: Block) {
         current nl(). app('{'). tab()
+        current app("/* ----  visitBlock----- */")
         for(stmt in b getBody()) {
             writeLine(stmt)
         }
@@ -478,6 +492,7 @@ CGenerator: class extends Skeleton {
 
     visitVersionBlock: func (node: VersionBlock) {
         VersionWriter writeStart(this, node getSpec())
+        current app("/* ----  visitVersionBlock ----- */")
         for(statement in node getBody()) {
             writeLine(statement)
         }

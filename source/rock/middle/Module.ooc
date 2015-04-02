@@ -262,7 +262,8 @@ Module: class extends Node {
     getTypes:     func -> MultiMap<String, TypeDecl>  { types }
     getUses:      func -> List<Use>          { uses }
 
-    accept: func (visitor: Visitor) { visitor visitModule(this) }
+    accept: func (visitor: Visitor) {
+      visitor visitModule(this) }
 
     /** @return global (e.g. non-namespaced) imports */
     getGlobalImports: func -> List<Import> { imports }

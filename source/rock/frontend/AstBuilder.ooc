@@ -15,7 +15,7 @@ import ../middle/[FunctionDecl, VariableDecl, TypeDecl, ClassDecl, CoverDecl,
     Match, FlowControl, While, CharLiteral, InterfaceDecl, NamespaceDecl,
     Version, Use, Block, ArrayLiteral, EnumDecl, BaseType, FuncType,
     Declaration, PropertyDecl, CallChain, Tuple, Addon, Try, CommaSequence,
-    TemplateDef]
+    TemplateDef, Ccode]
 
 nq_parse: extern proto func (AstBuilder, CString) -> Int
 
@@ -786,6 +786,17 @@ AstBuilder: class {
     onFunctionOverride: unmangled(nq_onFunctionOverride) func {
       checkModifierValidity("override", false)
       peek(FunctionDecl) isOverride = true
+    }
+
+    onCcodeStart: unmangled(nq_onInsertCStart) func  {
+      stack push(Ccode new(token()))
+    }
+    onCcodeEnd: unmangled(nq_onInsertCEnd) func -> Ccode {
+      pop(Ccode)
+    }
+
+    onCChunk: unmangled(nq_onCChunk) func(chunk: CString) {
+      println("ccccccccccc")
     }
 
     /*
