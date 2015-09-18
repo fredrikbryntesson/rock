@@ -96,7 +96,7 @@ UseDef: class {
             if (params verboser) {
                 "Use %s sourced from %s" printfln(identifier, file path)
             }
-
+            println("parsin usefiles" + identifier)
             cached read(file, params)
             This cache put(identifier, cached)
 
@@ -270,7 +270,6 @@ UseDef: class {
                            trim() /* general whitespace */ \
                            trim(8 as Char /* backspace */) \
                            trim(0 as Char /* null byte */)
-
             if (line empty?() || line startsWith?('#')) {
                 // skip comments
                 continue
@@ -278,9 +277,11 @@ UseDef: class {
 
             lineReader := StringReader new(line)
             if (line startsWith?("version")) {
+                println("line startsWith version")
                 lineReader readUntil('(')
                 lineReader rewind(1)
                 versionExpr := lineReader readAll()[0..-2] trim()
+                println(versionExpr)
 
                 useVersion := parseVersionExpr(versionExpr, params)
                 versionStack push(UseProperties new(this, useVersion))
@@ -317,6 +318,7 @@ UseDef: class {
             } else if (id == "CustomPkg") {
                 current customPkgs add(parseCustomPkg(value))
             } else if (id == "Libs") {
+                println("found libs")
                 for (lib in value split(',')) {
                     current libs add(lib trim())
                 }
@@ -412,6 +414,7 @@ UseDef: class {
             } else if (id == "Version") {
                 versionNumber = value
             } else if (id == "Imports") {
+                println("found imports")
                 parseImports(value)
             } else if (id == "Origin" || id == "Variant") {
                 // known, but ignored ids
@@ -456,7 +459,7 @@ UseDef: class {
     getRelevantProperties: func (params: BuildParams) -> UseProperties {
         if (!_relevantProperties) {
             _relevantProperties = UseProperties new(this, UseVersion new(this))
-
+            println("relevantprop")
             properties filter(|p| p useVersion satisfied?(params)) each(|p|
                 _relevantProperties merge!(p)
             )
@@ -489,6 +492,7 @@ UseProperties: class {
     includes            : ArrayList<String> { get set }
     libPaths            : ArrayList<String> { get set }
     libs                : ArrayList<String> { get set }
+    imports            : ArrayList<String> { get set }
 
     init: func (=useDef, =useVersion) {
         pkgs                = ArrayList<String> new()
@@ -499,6 +503,7 @@ UseProperties: class {
         includes            = ArrayList<String> new()
         libPaths            = ArrayList<String> new()
         libs                = ArrayList<String> new()
+        imports            = ArrayList<String> new()
     }
 
     merge!: func (other: This) -> This {
@@ -510,6 +515,7 @@ UseProperties: class {
         includes                  addAll(other includes)
         libPaths                  addAll(other libPaths)
         libs                      addAll(other libs)
+        imports                  addAll(other libs)
     }
 }
 
@@ -566,9 +572,21 @@ UseVersionValue: class extends UseVersion {
             case "ios" =>
                 // ios version not supported yet, false by default
                 false
+            case "cogneco" =>
+                true
+            //case => params customUseVersionName
+              //true
+            /*  if(value == params customUseVersionName)
+                true
+              else
+                {
+                  message := "Unknown version %s" format(value)
+                  params errorHandler onError(UseFormatError new(useDef, message))
+                  false
+                }*/
             case =>
                 message := "Unknown version %s" format(value)
-                params errorHandler onError(UseFormatError new(useDef, message))
+                //params errorHandler onError(UseFormatError new(useDef, message))
                 false
         }
     }
@@ -633,5 +651,3 @@ UseFormatError: class extends Error {
         super(nullToken, "Error while parsing %s: %s" format(useDef file path, message))
     }
 }
-
-

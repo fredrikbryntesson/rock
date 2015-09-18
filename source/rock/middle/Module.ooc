@@ -466,50 +466,51 @@ Module: class extends Node {
             if (imp module) continue // nothing to do
 
             // import paths may contain ".." or relative paths - get it straight first
-            (_path, impFile, impElement) := AstBuilder getRealImportPath(imp, this, params)
-            if (!impFile) {
-                params errorHandler onError(ModuleNotFound new(imp))
-                continue
+              (_path, impFile, impElement) := AstBuilder getRealImportPath(imp, this, params)
+              if (!impFile) {
+                  params errorHandler onError(ModuleNotFound new(imp))
+                  continue
+              }
+              absolutePath := impFile getAbsolutePath()
+
+              // the cache is a key-value store where keys are the absolute paths of modules.
+              cached := AstBuilder cache get(absolutePath)
+              impLastModified := impFile lastModified()
+
+              // look for path errors on case-insensitive filesystems
+              version (windows) {
+                  longPath := impFile getLongPath()
+                  importAtom := _path trimLeft(".")
+                  if (!longPath endsWith?(importAtom)) {
+                      params errorHandler onError(InternalError new(imp token, "Import path is case-inconsistent with file system (actual file is %s)" \
+                          format(longPath) ))
+                  }
+              }
+
+              // if it's not in the cache or outdated, reparse.
+              if (!cached || impLastModified > cached lastModified) {
+                  if (cached && params veryVerbose) {
+                      "%s has been changed, recompiling... (%d vs %d), import path = %s" printfln(_path, impFile lastModified(), cached lastModified, impFile path)
+                  }
+
+                  cached = Module new(_path[0..-5], impElement path, params, nullToken)
+                  // clean the cache
+                  AstBuilder cache remove(absolutePath)
+                  AstBuilder cache put(absolutePath, cached)
+                  imp setModule(cached)
+
+                  cached token = nullToken
+                  cached token module = cached
+                  if (resolver) resolver addModule(cached)
+
+                  cached lastModified = impLastModified
+                  AstBuilder new(impFile path, cached, params)
+              }
+
+              imp setModule(cached)
+              cached parseImports(resolver)
             }
-            absolutePath := impFile getAbsolutePath()
 
-            // the cache is a key-value store where keys are the absolute paths of modules.
-            cached := AstBuilder cache get(absolutePath)
-            impLastModified := impFile lastModified()
-
-            // look for path errors on case-insensitive filesystems
-            version (windows) {
-                longPath := impFile getLongPath()
-                importAtom := _path trimLeft(".")
-                if (!longPath endsWith?(importAtom)) {
-                    params errorHandler onError(InternalError new(imp token, "Import path is case-inconsistent with file system (actual file is %s)" \
-                        format(longPath) ))
-                }
-            }
-
-            // if it's not in the cache or outdated, reparse.
-            if (!cached || impLastModified > cached lastModified) {
-                if (cached && params veryVerbose) {
-                    "%s has been changed, recompiling... (%d vs %d), import path = %s" printfln(_path, impFile lastModified(), cached lastModified, impFile path)
-                }
-
-                cached = Module new(_path[0..-5], impElement path, params, nullToken)
-                // clean the cache
-                AstBuilder cache remove(absolutePath)
-                AstBuilder cache put(absolutePath, cached)
-                imp setModule(cached)
-
-                cached token = nullToken
-                cached token module = cached
-                if (resolver) resolver addModule(cached)
-
-                cached lastModified = impLastModified
-                AstBuilder new(impFile path, cached, params)
-            }
-
-            imp setModule(cached)
-            cached parseImports(resolver)
-        }
     }
 
     resolve: func (trail: Trail, res: Resolver) -> Response {

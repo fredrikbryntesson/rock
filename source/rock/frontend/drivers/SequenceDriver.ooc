@@ -217,6 +217,12 @@ SequenceDriver: class extends Driver {
             for (additional in props additionals) {
                 buildAdditional(sourceFolder, uze, additional)
             }
+            println("---------------------START--------------------")
+            println(uze name)
+            println(uze identifier)
+            println(props libs size toString())
+            println(props imports size toString())
+            println("---------------------END--------------------")
         }
 
         0
@@ -364,4 +370,3 @@ AdditionalJob: class extends Job {
     }
 
 }
-

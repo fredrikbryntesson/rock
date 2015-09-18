@@ -177,7 +177,7 @@ CommandLine: class {
                     params libPath = File new(option substring(5))
 
                 } else if(option startsWith?("use=")) {
-                    
+
                     if (!longOption) warnUseLong("use")
                     params builtinUses add(option substring(4))
 
@@ -219,7 +219,7 @@ CommandLine: class {
                     params defaultMain = false
 
                 } else if (option == "static") {
-		     
+
 		    params staticLib = true
 		} else if (option startsWith?("gc=")) {
 
@@ -480,8 +480,10 @@ CommandLine: class {
                 } else if (option == "versionwarning")  {
                   params showVersionWarnings = true
 
-                } else {
+                } else if (option startsWith?("useVersion=")) {
+                  params customUseVersionName =  option substring("target=" length())
 
+                } else {
                     "Unrecognized option: %s" printfln(arg)
 
                 }
@@ -803,4 +805,3 @@ CompilationFailedException: class extends Exception {
         super("Compilation failed!")
     }
 }
-

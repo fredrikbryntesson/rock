@@ -256,6 +256,9 @@ BuildParams: class {
     // compilation driver
     driver := SequenceDriver new(this)
 
+    // custom version name for use-files
+    customUseVersionName: String
+
     validBinaryName?: func (name: String) -> Bool {
         if (File new(name) dir?()) {
             stderr write("Naming conflict (output binary) : There is already a directory called %s.\nTry a different name, e.g. '-o=%s2'\n" format(name, name))
